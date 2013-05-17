@@ -36,3 +36,5 @@ To fix this, either run `memeat` as root or change the resource limits by adding
     myuser          hard     memlock         16000000
 
 This will allow the user `myuser` to eat up to 16 GB of RAM.
+
+Eating too much memory will freeze your system for a while, then, the [OOM killer](http://linux-mm.org/OOM_Killer) will kick in and most likely kill `memeat`.
