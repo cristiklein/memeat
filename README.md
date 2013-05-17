@@ -26,9 +26,13 @@ and re-run the same `iozone` command. We now obtain a random read throughput of 
 
 Notes
 -----
-The Linux kernel limits the amount of memory that can be `mlock()`. If you run this utility as an unprileged user, you will most likely get the following error:
+The Linux kernel limits the amount of memory that can be `mlock()`. If you run this utility as an unprileged (non-root) user, you will most likely get the following error:
 
     mlock() failed: Cannot allocate memory
 
-Therefore, this utility is best run as root.
+To fix this, either run `memeat` as root or change the resource limits by adding the following entries to `/etc/security/limits.conf`:
 
+    myuser          soft     memlock         16000000
+    myuser          hard     memlock         16000000
+
+This will allow the user `myuser` to eat up to 16 GB of RAM.
