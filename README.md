@@ -1,32 +1,32 @@
-Memory Eater
-============
-This utility uses `mmap()` and `mlock()` to eat up RAM memory. This prevents the kernel for using this memory for more useful purposes, like page caching. The utility can be used as an alternative to the `mem=` kernel command-line, when page caching stands in the way of testing disk performance.
+`memeat`: A Memory Eater
+========================
+This utility uses `mmap()` and `mlock()` to eat up RAM. This prevents the kernel from using RAM for more useful purposes, like page caching. The utility can be used as an alternative to the `mem=` kernel command-line, when page caching stands in the way of testing disk performance.
 
-Instalation
+Installation
 -----------
-The program is very simple and depends only requires a C compile and POSIX headers. On Ubuntu the typing the following command will suffice to install all dependencies:
+Building `memeat` from source code is very simple and only requires a C compiler and POSIX headers. On Ubuntu, the following command will suffice to install all dependencies:
 
     sudo apt-get install build-essential
 
-A Makefile is provided for convenience:
+A `Makefile` is provided for convenience:
 
     make
 
 Example Usage
 -------------
-This example uses [iozone](http://www.iozone.org/) to show how to make file-system opperations disk-bound. The experiments have been conducted on a machine with 8GB of RAM. We first execute:
+This example uses [iozone](http://www.iozone.org/) to show how to make file-system operations disk-bound. The experiments have been conducted on a machine with 8GB of RAM and a Western Digital Caviar Blue Serial ATA disk. We first execute:
 
     iozone -s 1g -r 256k -i 0 -i 2
 
-which returns a random read throughput of **4.8 GB/s**. Clearly, most reads have been **served from RAM**. Now we eat 5GB of memory:
+This measures a random read throughput of **4.8 GB/s**. Clearly, most reads have been **served from RAM**. If we now eat 5 GB of RAM
 
     sudo ./memeat 5G
 
-and re-run the same `iozone` command. We now obtain a random read throughput of **22 MB/s**. This is the expected random read throughput of the disk, thus, we can conclude that most of the reads have been **served from disk**.
+and re-run the same `iozone` command, we obtain a random read throughput of **22 MB/s**. This is the expected random read throughput of the disk, thus, we can conclude that most of the reads have been **served from disk**.
 
 Notes
 -----
-The Linux kernel limits the amount of memory that can be `mlock()`. If you run this utility as an unprileged (non-root) user, you will most likely get the following error:
+The Linux kernel limits the amount of memory that can be `mlock()`. If you run this utility as an unprivileged (non-root) user, you will most likely get the following error:
 
     mlock() failed: Cannot allocate memory
 
