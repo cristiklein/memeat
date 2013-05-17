@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <sys/resource.h>
 
 int main(int argc, char **argv)
 {
@@ -46,25 +47,38 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Parse error, unrecognized suffix: %s\n", endptr);
 		exit(EXIT_FAILURE);
 	}
+	fprintf(stderr, "Will eat %ld bytes\n", amount);
 
 	/*
 	 * Eat memory
 	 */
-	fprintf(stderr, "Eating: %ld bytes\n", amount);
+
+	/* Print some debugging info */
+	struct rlimit rlimit;
+	if (getrlimit(RLIMIT_MEMLOCK, &rlimit) == -1) {
+		perror("Warning, getrlimit() failed");
+	}
+	else {
+		fprintf(stderr, "Current RLIMIT_MEMLOCK: %ld %ld\n", rlimit.rlim_cur, rlimit.rlim_max);
+		if (rlimit.rlim_cur < amount && geteuid() != 0) {
+			fprintf(stderr, "Warning, this utility is run by an unprivileged user and resource limit is too low. mlock() might fail.\n");
+		}
+	}
+
+	/* Actually eat */
 	void *mem = mmap(NULL, amount, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (mem == MAP_FAILED) {
-		perror("mmap() failed");
+		perror("Fatal error, mmap() failed");
 		exit(EXIT_FAILURE);
 	}
 	if (mlock(mem, amount) == -1) {
-		perror("mlock() failed");
-		exit(EXIT_FAILURE);
+		perror("Error, mlock() failed");
 	}
 
 	/*
 	 * Wait
 	 */
-	fprintf(stderr, "Press CTRL+C to stop\n");
+	fprintf(stderr, "Eating RAM, press CTRL+C to stop\n");
 	sleep(365*24*60*60); /* XXX: 1 year instead of infinity */
 
 	/*
