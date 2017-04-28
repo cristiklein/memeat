@@ -1,8 +1,10 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
+#include <unistd.h>
 
 int main(int argc, char **argv)
 {
